@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "browsers": ["> 1%", "last 2 versions", "not ie <= 8"]
+        },
+        "useBuiltIns": "usage"
+      }
+    ]
+  ],
+  // babel会默认对node_modules的umd包做处理，本地则不会，这里方便调试加上了
+  // 开启之后，打包不会进行分析，也就没有了按需引入的概念，建议调试时开启
+  // "plugins": ["@babel/plugin-transform-modules-umd"]
+}
