@@ -1,5 +1,5 @@
 import { funConfigType } from "../types/axiosFun";
-const request = (config: funConfigType) => {
+const request = function (config: funConfigType) {
   return new Promise((resolve, reject) => {
     const { method, url, data } = config;
 

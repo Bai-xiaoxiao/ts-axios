@@ -35,6 +35,7 @@ import {
   simpleObj,
 } from "./types/axiosFun";
 import req from "./core/request";
+
 const axios = (config: funConfigType) => {
   return req(config);
 };
@@ -49,21 +50,40 @@ class Axios {
   baseURL?: string;
   timeout?: number;
   headers?: simpleObj;
+  interceptors: any;
 
   constructor(props: createConfig) {
     const { baseURL, timeout, headers } = props;
     this.baseURL = baseURL;
     this.timeout = timeout;
     this.headers = headers;
+
+    const reqInterceptors: any = [];
+    reqInterceptors.use = (fun: Function) => {
+      reqInterceptors.push(fun);
+    };
+    this.interceptors = {
+      request: reqInterceptors,
+    };
   }
 
   get(url: string, param?: getParams) {
+    const { request } = this.interceptors;
     const { baseURL } = this;
-    return req({
+    let config: any = {
       method: "get",
       url: baseURL ? `${baseURL}${url}` : url,
       data: param ? param.params : undefined,
-    });
+    };
+
+    if (request.length) {
+      // 串行处理config
+      request.forEach((fun: Function) => {
+        config = fun(config);
+      });
+    }
+
+    return req(config);
   }
 }
 axios.create = (config: createConfig) => {
@@ -77,6 +97,15 @@ document.querySelector("#req")?.addEventListener("click", () => {
       "X-TOKEN": 123123,
     },
   });
+  api.interceptors.request.use((config: funConfigType) => {
+    console.log(config);
+
+    if (config.data?.xxx === 1) {
+      config.url += "?a=111";
+    }
+
+    return config;
+  });
   console.log(api);
   api
     .get("/mock/605b180b0d58b864da03d869/example/mock", {
@@ -84,7 +113,7 @@ document.querySelector("#req")?.addEventListener("click", () => {
         xxx: 1,
       },
     })
-    .then((res) => {
+    .then((res: any) => {
       console.log(res);
     });
   return;
@@ -96,17 +125,17 @@ document.querySelector("#req")?.addEventListener("click", () => {
       lastName: "Flintstone",
     },
   })
-    .then((res) => {
+    .then((res: any) => {
       console.log(res);
     })
-    .catch((err) => {
+    .catch((err: any) => {
       console.log(err);
     });
   axios
     .get(
       "https://mock.mengxuegu.com/mock/605b180b0d58b864da03d869/example/mock"
     )
-    .then((res) => {
+    .then((res: any) => {
       console.log(res);
     });
 });
